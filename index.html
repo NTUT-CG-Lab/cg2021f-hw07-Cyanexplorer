@@ -116,9 +116,9 @@
 			}
 
 			let counter = 0
-            let ratio = dataBuffer.length * max
+            let ratio = max / dataBuffer.length
 			for (let i = 0; i < histogram.length; i++) {
-				counter = counter + histogram[i] / ratio
+				counter = counter + histogram[i] * ratio
                 histogram[i] = parseInt(counter)
 			}
 
@@ -324,11 +324,11 @@
 			dlBtn.addEventListener('click', () => {
 				let data, maxColor = 0
 				let length = dataArray.length / channel
-                if (bit == 8) {
+                if (bit == 16) {
                     data = new Uint16Array(length)
                     maxColor = 65535
                 }
-                else if (bit == 16) {
+                else if (bit == 8) {
                     data = new Uint8Array(length)
                     maxColor = 255
                 }
@@ -346,7 +346,7 @@
                     outputname = 'model'
 				}
 
-                outputname = `${outputname}_${dimension.x}_${dimension.y}_${dimension.z}_uint${bit}`
+                outputname = `${outputname}_${dimension.x}_${dimension.y}_${dimension.z}_uint${bit}.raw`
                 Dicom2Raw.downloadData(outputname, data)
             })
 
