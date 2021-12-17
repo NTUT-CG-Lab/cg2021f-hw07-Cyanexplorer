@@ -3,7 +3,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title> 作業七範例程式 </title>
+	<title> 作業七 </title>
 
 	<style>
 		div {
@@ -86,9 +86,12 @@
         let clickEvt = new Event('click')
 
 		let getMinMax = function (dataBuffer) {
-			let min = dataBuffer[0]
-			let max = dataBuffer[0]
+			console.log(dataBuffer)
+            let min = dataBuffer[0], max = dataBuffer[0]
+
+
 			for (let i = 0; i < dataBuffer.length; i++) {
+
 				if (dataBuffer[i] > max) {
 					max = dataBuffer[i]
 				}
@@ -100,15 +103,42 @@
 			return { min: min, max: max }
 		}
 
+        let logArray = (dataBuffer) => {
+			for (let i = 0; i < dataBuffer.length; i++) {
+                dataBuffer[i] = Math.log(dataBuffer[i] * dataBuffer[i]+1)
+            }
+		}
+
+		let mapHistogram = (dataBuffer, max) => {
+			let histogram = new Uint16Array(max)
+            for (let i = 0; i < dataBuffer.length; i++) {
+				histogram[dataBuffer[i]]++
+			}
+
+			let counter = 0
+            let ratio = dataBuffer.length * max
+			for (let i = 0; i < histogram.length; i++) {
+				counter = counter + histogram[i] / ratio
+                histogram[i] = parseInt(counter)
+			}
+
+			for (let i = 0; i < dataBuffer.length; i++) {
+                dataBuffer[i] = histogram[dataBuffer[i]]
+            }
+        }
+
 		let bitConvertor = (buffer, bit, chl) => {
 			let dataBuffer, cmpSize
 
 			if (bit == 16) {
 				dataBuffer = new Uint16Array(buffer)
+				mapHistogram(dataBuffer, 65535)
+				//logArray(dataBuffer)
 				cmpSize = getMinMax(dataBuffer)
 			}
 			else if (bit == 8) {
-                dataBuffer = new Uint8Array(buffer)
+				dataBuffer = new Uint8Array(buffer)
+                mapHistogram(dataBuffer, 255)
                 cmpSize = getMinMax(dataBuffer)
 			}
 			else {
@@ -141,7 +171,7 @@
 			 * 需要 new 一個實例出來
 			*/
 			var dicom2Raw = new Dicom2Raw();
-
+            console.log(dicom2Raw)
 			/**
 			 * 選擇一個資料夾上傳
 			*/
@@ -158,7 +188,7 @@
 					 * 將對 dicom  系列的圖像進行整理和組織
 					 * 組成一個真正有序的 object
 					*/
-                    console.log(dicom2Raw)
+                    
 					dicom2Raw.build();
 					dicom2Raw.concatnate(() => {
 						document.getElementById('info').innerText = '讀取成功';
@@ -173,7 +203,7 @@
 						let end = start + imgSize * channel
 
 						dataArray = bitConvertor(dicom2Raw.rawData, dataBit, channel)
-
+						console.log(dataArray)
 						let geometry = new THREE.PlaneGeometry(dimension.x, dimension.y)
                         let texture = new THREE.DataTexture(dataArray.subarray(start, end), dimension.x, dimension.y)
                         texture.format = THREE.RGBFormat
